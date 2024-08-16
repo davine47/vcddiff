@@ -405,6 +405,13 @@ static void variable(FILE* fp, char* file_name) {
 /* setup memory for the hash of signals, which is the max of all signals,
  * then setup up arrays according to the signal's code index
  */
+static void alloc_sig_mem_single(void) {
+   struct signal_t* sig;
+
+   sig_int1G = (struct signal_t**)calloc(sizeof(struct signal_t*), (max_codeG + 1));
+   for (sig = sig1_hdG; sig != NULL; sig = sig->next) sig_int1G[sig->sig_code] = sig;
+}
+
 static void alloc_sig_mem(void) {
    struct signal_t* sig;
 
@@ -1373,6 +1380,48 @@ static void set_options(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
+
+   int unit1, tnum1;
+   long start1;
+   char *file_nam1;
+   FILE *fp1;
+
+   char* aa ;
+   extended_flagG = FALSE;
+   quit_flagG = FALSE;
+   sig1_hdG = NULL;
+
+   //print_header();
+   if (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) print_help();
+   wrap_flagG = state_flagG = FALSE;
+
+   if ((fp1 = fopen(argv[argc - 1], "r")) == NULL) {
+      printf("*** ERROR-opening file %s\n", argv[argc - 1]);
+      exit(1);
+   }
+
+   /* set first file to the global pointer to check the line count */
+   file1G = fp1;
+   set_options(argc, argv);
+   sig_int1G = NULL;
+
+   /*could skip copying the filename, just pass argv*/
+   file_nam1 = (char*)malloc(strlen(argv[argc - 1]) + 1);
+   strcpy(file_nam1, argv[argc - 1]);
+   start1 = get_lines(fp1, &unit1, &tnum1, file_nam1);
+
+   alloc_sig_mem_single();
+
+   aa = sig1_hdG[0].signame;
+   
+   printf("---->%s\n", aa);
+   /* free and close */
+   free(sig_int1G);
+   fclose(fp1);
+   return (0);
+}
+
+int _main(int argc, char** argv) {
    int unit1, unit2, tnum1, tnum2;
    long start1, start2;
    char *file_nam1, *file_nam2;
